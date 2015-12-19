@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 若使用了org.mybatis.spring.mapper.MapperFactoryBean 或者 org.mybatis.spring.mapper.MapperScannerConfigurer 
+	来配置数据库访问层，所以只需要写数据库访问接口，而不需要写相应的实现类，但是必须满足下列条件： 1、namespace的名字必须与接口的名字（包含包名）一致 
+	； 2、id的名称必须与对应接口的抽象方法名一致。 -->
+
+<!--public PermissionVo  hasPermission(PermissionVo permissionVo);
+	public int addRoles(PermissionVo permissionVo);
+	
+	public int  deleteRoles (PermissionVo permissionVo);
+	public int  updateRoles(PermissionVo permissionVo);
+	public List getAllRoles();
+	
+	public  int addAction(PermissionVo permissionVo);
+	public  int updateAction(PermissionVo permissionVo);
+	public  int deleteAction(PermissionVo permissionVo);
+	public  List getAllActions(PermissionVo permissionVo);
+	public  List getActionsByRoles(PermissionVo permissionVo); -->
+	
+<mapper namespace="dao.PermissionDao">
+   <select id="hasPermission" parameterType="map" resultType="vo.PermissionVo">
+   		SELECT		rar.action_id,ai.action_name,ai.namespace
+   		FROM		role_action_relationship rar,action_info ai
+   		
+   		WHERE       rar.action_id=ai.action_id
+   		<if test="roles!=null and roles!=''">
+   		    	AND 	rar.role_id  IN
+   			<foreach collection="roles" open="(" separator="," item="role_id" close=")">
+   		      	    #{role_id}
+   			</foreach>
+   		</if>
+   		
+   		<if test="action_name!=null and ''!=action_name">
+   			AND    ai.action_name=#{action_name}
+   		</if>
+   		
+   		 <if test="nameSpace=='' or nameSpace==null">
+   		    	 AND   ( ai.nameSpace='' or  ai.nameSpace is null)
+   		 </if>
+   		 <if test="nameSpace!=null and  nameSpace!=''">    
+   		 		AND    ai.nameSpace=#{nameSpace}
+   		 </if>
+   </select>
+   
+   <insert id="addRoles" parameterType="java.util.List">
+       INSERT  INTO   user_roles 
+      <foreach collection="roles"  item="r" >
+       VALUES(  SELECT NVL(MAX(role_id),0)+1 FROM user_roles,
+               #{r.role_name,jdbcType=VARCHAR},
+               #{r.role_desc,jdbcType=VARCHAR})  
+       </foreach>     
+   </insert>
+   
+   <delete id="deleteRoles" parameterType="map">
+   		DELETE   FROM   user_roles
+   		WHERE    
+   		<if  test="role_id!=null and ''!=role_id">
+   			    role_id=#{role_id}
+   		</if>
+   		<if test="roles!=null and ''!=null">
+   				role_id  IN
+   		       <foreach collection="roles" open="(" separator="," item="role_id" close=")">
+   		             #{role_id}
+   		       </foreach>
+   		</if>
+   </delete>
+   
+   <update id="updateRoles" parameterType="map">
+   		UPDATE		user_roles
+   		<set>
+   			<if test="role_name!=null and ''!=role_name">
+   			  		 role_name=#{role_name},
+   			</if>
+   			<if test="role_desc!=null and ''!=role_desc">
+   					role_desc=#{role_desc}
+   			</if>
+   		</set>		
+   		WHERE   role_id=#{role_id}
+   		
+   </update>
+   
+   <select id="getAllRoles" resultType="vo.PermissionVo">
+   		SELECT    role_id,role_name,role_desc
+   		FROM      user_roles
+   		<where>
+   			<if test="role_id!=null and ''!=role_id" >
+   				 role_id=#{role_id}
+   			</if>
+   			<if test="role_name!=null and ''!=role_name">
+   				role_name like  #{role_name}
+   			</if>
+   		</where>
+   </select>
+   
+   <!-- public  int addAction(PermissionVo permissionVo);
+	public  int updateAction(PermissionVo permissionVo);
+	public  int deleteAction(PermissionVo permissionVo);
+	public  List getActions(PermissionVo permissionVo);
+ -->
+   
+   
+   <insert id="addAction" parameterType="map" >
+   		INSERT  INTO   action_info
+   		VALUES(SELECT NVL(SELECT MAX(action_id,0)+1) FROM action_info,
+   			   #{action_name,jdbcType=VARCHAR},
+   			   #{namSpace,jdbcType=VARCHAR},
+   			   #{action_desc,jdbcType=VARCHAR},
+   			   #{permission_name,jdbcType=VARCHAR})
+   </insert>
+   
+   <update id="updateAction" parameterType="map">
+   		UPDATE  action_info
+   		<set>
+   			<if test="action_name!=null and ''!=action_name">
+   				action_name=#{action_name},
+   			</if>
+   			<if test="namSpace!=null and ''!=namSpace">
+   			    namSpace=#{namSpace},
+   			</if>
+   			<if test="action_desc!=null and ''!=action_desc">
+   				action_desc=#{action_desc},
+   			</if>
+   			<if test="permission_name!=null and ''!=permission_name">
+   				permission_name=#{permission_name}
+   			</if>
+   		</set>
+   		
+   		WHERE   action_id=#{action_id}
+   </update>
+   
+   <delete id="deleteAction" parameterType="vo.PermissionVo">
+   		DELETE  FROM   action_info
+   		WHERE  
+   		<if test="action_id!=null and ''!=action_id">
+   		 		action_id=#{action_id}   		
+   		</if>
+   		<if test="roles!=null and ''!=roles">
+   		       action_id  IN
+   			<foreach collection="roles" open="(" separator="," item="role_id" close=")">
+   					role_id=#{role_id}
+   			</foreach>
+   		</if>
+   </delete>
+   
+   <select id="getActions" parameterType="map" resultType="vo.PermissionVo">
+   	    SELECT 	  action_id,action_name,namSpace,action_desc,permission_name
+   	    FROM      action_info
+   	    <where>
+   	    	<if test="action_id!=null ''!=action_id">
+   	    	      action_id=#{action_id}
+   	    	</if>
+   	    	<if test="action_name!=null and ''!=action_name">
+   			   AND  action_name=#{action_name},
+   			</if>
+   			<if test="namSpace!=null and ''!=namSpace">
+   			   AND   namSpace=#{namSpace}
+   			</if>
+   			<if test="action_desc!=null and ''!=action_desc">
+   				AND  action_desc=#{action_desc}
+   			</if>
+   			<if test="permission_name!=null and ''!=permission_name">
+   				AND  permission_name like #{permission_name}
+   			</if>
+   	    </where>
+   </select>
+   
+   <!-- public int  addPermission(PermissionVo permissionVo);
+	public int  deletePermission(PermissionVo permissionVo); 
+	public List getPermissions(PermissionVo permissionVo);-->
+	 
+	<select id="getPermissions" parameterType="map" resultType="vo.PermissionVo">
+		SELECT   	rar.action_id,ai.action_name,ai.namespace,action_desc,permission_name
+		FROM		role_action_relationship rar,action_info ai
+		WHERE		rar.action_id=ai.action_id
+		<if test="role_id!=null and ''!=role_id">
+			AND 	rar.role_id=#{role_id}
+		</if>
+		<if test="roles!=null and ''!=roles">
+		    AND     role_id   IN
+			<foreach collection="roles" open="(" separator="," item="role_id" close=")">
+				    #{role_id}
+			</foreach>
+		</if>
+	</select>
+	
+	<insert id="addPermission" parameterType="java.util.List">
+	
+		INSERT INTO 	role_action_relationship t
+	<foreach collection="list" item="pm" >
+		VALUES(SELECT NVL(MAX(rel_id),0)+1 FROM  t,
+		#{pm.action_id,jdbcType=DECIMAL},
+		#{pm.role_id,jdbcType=DECIMAL)
+		</foreach>
+	</insert>
+	
+	<delete id="deletePermission" parameterType="map">
+		DELETE  FROM  role_action_relationship
+		WHERE   
+		 <if test="rel_id!=null and ''!=rel_id">
+		 	    rel_id=#{rel_id}
+		 </if>
+		 <if test="role_id!=null and ''!=role_id">
+		 		role_id=#{role_id}
+		 </if>
+	</delete>
+	
+</mapper>					

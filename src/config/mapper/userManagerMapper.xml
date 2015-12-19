@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserManagerDao">
+
+	<!-- public UserManagerVo getCustInfoList(UserManagerVo customer ); -->
+	<select id="getCustInfoList" parameterType="map" resultType="vo.UserManagerVo">
+		SELECT c.user_id,c.cust_name,c.cust_email,c.cust_tel,
+
+		u.sigup_time,u.last_login_time,u.last_logoff_time
+
+
+		FROM customers
+		c,user_info u
+
+		WHERE u.user_id=c.cust_id
+		<if test="user_id!=null and ''!=user_id">
+			AND user_id=#{user_id}
+		</if>
+		<if test="cust_name!=null and ''!=cust_name">
+			AND cust_name like #{cust_name}
+		</if>
+		<if test="begin_signup_time!=null and begin_signup_time!=''">
+			AND signup_time >=#{begin_signup_time}
+		</if>
+
+		<if test="end_signup_time!=null and end_signup_time!=''">
+			AND signup_time &lt;= #{end_signup_time}
+		</if>
+		ORDER BY signup_time asc
+	</select>
+
+
+	<!-- public UserManagerVo getCustomerById(Long custid); -->
+	<select id="getCustomerById" parameterType="java.lang.Long"
+		resultType="vo.UserManagerVo">
+		SELECT
+		c.cust_id,c.user_id,c.cust_name,c.cust_address,c.cust_email,c.cust_tel,
+
+		u.user_name,u.sigup_time,u.last_login_time,u.last_logoff_time,
+		u.last_modify_time,u.last_modifier
+
+		FROM customers c,user_info u
+
+		WHERE e.pos_id=p.pos_id
+		AND d.dep_id=e.dep_id
+		AND e.emp_id=#{emp_id}
+	</select>
+
+	<!-- public void addCustomer(UserManagerVo userInfo ); -->
+	<insert id="addCustomer" parameterType="map">
+		<selectKey order="BEFORE" keyProperty="cust_id" resultType="java.lang.Long">
+			select SEQ_ABOUT_USER.NEXTVAL from dual
+		</selectKey>
+		INSERT INTO customers
+		VALUES( #{user_id,jdbcType=DECIMAL},
+		#{cust_name,jdbcType=VARCHAR},
+		#{cust_address,jdbcType=VARCHAR},
+		#{cust_email,jdbcType=VARCHAR},
+		#{cust_tel,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- public void deleteCustomerById(Long userid); -->
+	<delete id="deleteCustomerById" parameterType="java.lang.Long">
+		DELETE customers
+		WHERE cust_id=#{cust_id}
+	</delete>
+
+	<!--public void updateCustomer(UserManagerVo customer); -->
+	<update id="updateCustomer" parameterType="map">
+		UPDATE customers
+		<set>
+			<if test="cust_name!=null and ''!=user_id">
+				cust_name=#{cust_name}
+			</if>
+			<if test="user_address!=null and ''!=user_address">
+				user_address=#{user_address}
+			</if>
+			<if test="cust_email!=null and ''!=cust_email">
+				cust_email=#{cust_email}
+			</if>
+			<if test="cust_tel!=null and ''!=user_tel">
+				cust_tel=#{cust_tel}
+			</if>
+
+		</set>
+		WHERE user_id=#{user_id}
+	</update>
+
+
+
+	<!--public UserManagerVo getempInfoList(UserManagerVo employee ); -->
+	<select id="getEmpInfoList"  parameterType="vo.UserManagerVo" resultType="vo.UserManagerVo">
+		SELECT
+		e.emp_id,e.user_id,e.emp_name,e.pos_id,e.emp_address,e.emp_email,e.emp_tel,
+		d.dep_name,p.pos_name
+
+		FROM employees e,department d,position p
+
+		WHERE e.pos_id=p.pos_id
+		AND d.dep_id=e.dep_id
+		<if test="emp_name!=null and ''!=emp_name">
+			AND   e.emp_name like   #{emp_name}
+		</if>
+		<if test="pos_id!=null and ''!=pos_id">
+			AND	  p.pos_id=#{pos_id}				
+		</if>
+		<if test="dep_id!=null and ''!=dep_id">
+			AND	  p.dep_id=#{dep_id}				
+		</if>
+	</select>
+
+	<!-- public UserManagerVo getEmpById(Long empid); -->
+	<select id="getEmpById" parameterType="java.lang.Long" resultType="vo.UserManagerVo">
+		SELECT
+		e.emp_id,e.user_id,e.emp_name,e.pos_id,e.emp_address,e.emp_email,e.emp_tel,
+		d.dep_name,p.pos_name
+
+		FROM employees e,department d,position p
+
+		WHERE e.pos_id=p.pos_id
+		AND d.dep_id=e.dep_id
+		AND e.emp_id=#{emp_id}
+	</select>
+
+	<!-- public void addEmp(UserManagerVo userInfo ); -->
+	<insert id="addEmp" parameterType="vo.UserManagerVo">
+		<selectKey keyProperty="user_id" order="BEFORE" resultType="java.lang.Long">
+			select SEQ_ABOUT_USER.NEXTVAL from dual
+		</selectKey>
+		INSERT INTO employees
+		VALUES(	#{user_id,jdbcType=DECIMAL},
+				#{emp_name,jdbcType=VARCHAR},
+				#{dep_id,jdbcType=DECIMAL},
+				#{pos_id,jdbcType=DECIMAL},
+				#{emp_salary,jdbcType=DECIMAL},
+				#{emp_address,jdbcType=VARCHAR},
+				#{emp_email,jdbcType=VARCHAR},
+				#{emp_tel,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- public void deleteEmpById(Long userid); -->
+	<delete id="deleteEmpById" parameterType="java.lang.Long">
+		DELETE   employees
+		WHERE    user_id={user_id}
+	</delete>
+	
+	<!-- public void updateEmp(UserManagerVo employee); -->
+	<update id="updateEmp" parameterType="vo.UserManagerVo">
+        UPDATE   employees
+        <set>
+        	<if test="emp_name!=null and ''!=emp_name">
+        		  emp_name=#{emp_name},
+        	</if>
+        	<if test="dep_id!=null and dep_id!=''">
+        		  dep_id=#{dep_id},
+        	</if>
+        	<if test="pos_id!=null and ''!=pos_id">
+        		  pos_id=#{pos_id}
+        	</if>
+        	<if test="emp_salary!=null and ''!=emp_salary">
+        		  emp_salary=#{emp_salary,jdbcType=DECIMAL},
+        	</if>
+        	<if test="emp_address!=null and ''!=emp_address">
+        	      emp_address=#{emp_address,jdbcType=VARCHAR},
+        	</if>
+        	<if test="emp_email!=null and ''!=emp_email">
+        		  emp_email=#{emp_email,jdbcType=VARCHAR},
+        	</if>
+        	<if test="emp_tel!=null and ''!=emp_tel">
+        		  emp_tel=#{emp_tel,jdbcType=VARCHAR}
+        	</if>
+        </set>
+        where   user_id=#{user_id}
+	</update>
+
+	<update id="updateEmpSalaryByEmpId" parameterType="vo.UserManagerVo">
+		UPDATE   EMPLOYEES
+		<set>
+			<if test="salary!=null and ''!=salary">
+					salary=#{salary}
+			</if>
+		</set>
+		WHERE   user_id=#{user_id}
+	</update>
+
+    <update id="updateUserPwd" parameterType="vo.UserManagerVo">
+    	 UPDATE	User_info
+    	 <set>
+    	 	<if test="pwd!=null and pwd=!''">
+    	 			pwd=#{pwd}
+    	 	</if>
+    	 </set>
+    	 where  user_id=#{user_id}
+    </update>
+     
+   
+</mapper>

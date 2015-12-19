@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.PosManagerDao">
+   <!-- public void  addDepartment(DepartmentPojo dep); -->
+   <insert id="addDepartment" parameterMap="map" >
+   		INSERT  INTO 	department
+   		VALUES	  (   SEQ_ABOUT_USER.NEXTVAL,
+   					#{dep_name,jdbcType=VARCHAR},
+   					#{dep_desc,jdbcType=VARCHAR},
+   					#{parent_dep_id,jdbcType=DECIMAL}
+   				   )
+   		
+   </insert>
+   
+	<!-- public void  deleteDepById(Long dep_id); -->
+	<delete id="deleteDepById" parameterType="java.lang.Long">
+		DELETE  department
+		WHERE   dep_id=#{dep_id}
+	</delete>
+	
+	<select id="getDepIdFromPostion" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT   pos_id 
+		FROM 	 position  
+		WHERE    dep_id=#{dep_id} and rownum &lt; 2
+	</select>
+	
+	<!-- public void updateDepById(DepartmentPojo dep); -->
+	<update id="updateDepById" parameterType="map" >
+		UPDATE   department
+		<set>
+		  <if test="dep_name!=null and dep_name!=''">
+		  		dep_name=#{dep_name},
+		  </if>
+		   <if test="dep_desc!=null and dep_desc!=''">
+		   		dep_desc=#{dep_desc}
+		   </if>
+		   <if test="parent_dep_id!=null and ''!=parent_dep_id">
+		   		parent_dep_id=#{parent_dep_id}
+		   </if>	   
+		</set>
+		WHERE    dep_id=#{dep_id}
+	</update>
+	
+	<!-- public DepartmentPojo getDepById(Long dep_id); -->
+	<select id="getDepById" parameterType="java.lang.Long" resultType="pojo.DepartmentPojo">
+   		SELECT    dep_id,dep_name,dep_desc,parent_dep_id		
+   		FROM      department
+   		WHERE     dep_id=#{dep_id}
+     </select>
+	
+	<!-- public DepartmentPojo getDepartments(DepartmentPojo dep); -->
+	<select id="getDepartments" parameterType="pojo.DepartmentPojo" resultType="pojo.DepartmentPojo">
+		SELECT    dep_id,dep_name,dep_desc,parent_dep_id		
+   		FROM      department
+   		<where>
+   		<if test="dep_id!=null and ''!=dep_id">   		
+   		 		dep_id=#{dep_id}
+   		</if>
+   		<if test="dep_name !=null and ''!=dep_name">
+   			 and   dep_name like =#{dep_name}
+   		</if>
+   		<if test="parent_dep_id!=null and ''!=parent_dep_id">
+   			and	parent_dep_id=#{parent_dep_id}
+   		</if>
+   		</where> 
+	</select>
+</mapper>

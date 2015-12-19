@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户登录</title>
+<script type="text/javascript" src="../jquery/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="../jqueryUI/jquery-ui.min.css"></script>
+<script type="text/javascript" src="../jqueryUI/jquery-ui.min.js"></script>
+
+<script type="text/javascript">
+
+
+$(document).ready(function (){
+	var h=$(document).height();
+	var w=$(document).width();
+	//$("#bodyDiv").height(h-20);
+	
+	var tb_h=$("#tb").height();
+	var tb_w=$("#tb").width();
+	
+	$("#tb").css("margin-left",(w-tb_w)/2);
+	$("#tb").css("margin-top",(h-tb_h)/2);
+	
+	
+});
+
+
+
+
+function doSave(){
+	var isSignup=($("#signUp").text()=='注册');
+	var pwd=$("#pwd").val();
+	
+	var user_id=$("#user_id").val();
+	var user_name=$("#user_name").val();
+	
+	
+	if(isSignup&&(user_id==null ||user_id=='')){
+		alert("用户账号不能为空!");
+		return;
+	}else if(!isSignup&&(user_name==null ||user_name=='')){
+		window.alert("用户名不能为空!");
+		return;
+	}
+	if(pwd==null||pwd==''){
+		alert("密码不能为空!");
+		return;
+	}
+
+
+	
+	var url="signUp.action";
+	var data={"user_name":user_name,"pwd":pwd};
+	if(isSignup){
+		url="login.action";
+		data={"user_id":user_id,
+				  "pwd":pwd		 
+				 };
+	}
+	
+	
+	$.post(url,data,function(status,data){
+		if(status=='success'){
+			if(data=='注册成功!'){
+				$("#code").show();
+				$("#user_id").val(data.user_id);
+				$("#user_name").val(data.user_name);
+				$("#pwd").val(data.pwd);
+				$("#title").html("<font color='red'>恭喜您注册成功！以下是您的注册信息，请牢记：</font>");
+			}else{
+				alert(data);
+			}
+		}
+	})
+}
+
+
+function signUp(){
+	var text=$("#signUp").text();
+	if(text=='注册'){
+		$("#signUp").html('<font size="5px" class="text">登录</font>');
+		$("#title").html('<font class="text" size="6px">用户注册</font>');
+		$("#code").hide();
+		$("#name").show();
+		$("#nameTtile").html('<font size="5px" class="text"><font color="red">*</font>用户名</font>');
+		$("#pwd").attr("type","text");
+		$('#pwdText').html("<font color='red'>*</font>密&nbsp;码");
+	}else{
+		$("#signUp").html('<font size="5px" class="text">注册</font>');
+		$("#title").html('<font class="text" size="6px">用户登录</font>');
+		$("#name").hide();
+		$("#code").show();
+		$("#pwd").attr("type","password");
+		$('#pwdText').html("密码");
+	}
+	//alert((text=='注册')+'***'+text);
+	
+}
+</script>
+
+<style type="text/css">
+  table{
+      text-align:center;
+  	  width:550px;
+  	  height:230px;
+      background-image:url("../image/back.jpg");
+      background-position:center; 
+      background-repeat:no-repeat;
+  }
+  body {
+  	 background-color:#388DAC;
+  }
+  
+  .back{ background-color:#3981A7;
+   		 width:100px;
+  		 height:30px;
+  		 font:5px;
+  		 top:100px;
+       }
+  
+  input{
+        width:400px;
+  		height:30px;
+  }
+  
+  .text{
+  	   color:#FD9600;
+  }
+  
+</style>
+</head>
+<body >
+		
+ 
+	<form   id="form">
+		<table id="tb" >
+			<caption id="title"><font class="text" size="6px">用户登录</font></caption>
+			<tr id="code">
+				<td>
+					<font class="text" size="5px" >账号</font>
+					<input id="user_id" type="text" style="text-size:3px;font-size:20px;" >
+				</td>
+			</tr>
+			<tr style="display:none;" id="name">
+				<td>
+					<font class="text" size="5px" id="nameTtile">用户名</font>
+					<input  style="text-size:3px;font-size:20px;" id="user_name" >
+				</td>
+			</tr>
+			<tr>
+				
+				<td >
+					<font class="text" size="5px" id="pwdText" >密码</font>
+					<input name="pwd" id="pwd" type="password" style="text-size:3px;font-size:20px;">
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<input value="提交" type="button" onclick="doSave()" style="font-size:20px;color:#FD9600;" class="back"> 
+					<input value="重置" type="reset"  style="font-size:20px;color:#FD9600;" class="back">
+					<a id="signUp" href="#" onclick="signUp()"><font size="5px" class="text">注册</font></a>
+				</td>
+			</tr>
+		</table>
+	</form>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 若使用了org.mybatis.spring.mapper.MapperFactoryBean 或者 org.mybatis.spring.mapper.MapperScannerConfigurer 
+	来配置数据库访问层，所以只需要写数据库访问接口，而不需要写相应的实现类，但是必须满足下列条件： 1、namespace的名字必须与接口的名字（包含包名）一致 
+	； 2、id的名称必须与对应接口的抽象方法名一致。 -->
+
+<!-- public MajorPojo getMajorById(MajorPojo param); public List getMajorList(MajorPojo 
+	param); public int modifyMajor(MajorPojo param); public int deleteMajor(MajorPojo 
+	param); public int addMajor(MajorPojo param); -->
+	
+<mapper namespace="dao.LoginDao">
+    <select id="getuserInfoByLogin" parameterType="pojo.UserInfoPojo" resultType="vo.LoginVo">
+    		SELECT    user_id,user_name,is_employee,last_login_time,last_logoff_time
+    		FROM	  user_info 
+    		WHERE	  user_id=#{user_id} 
+    		AND		  pwd=#{pwd}
+    </select>
+    
+    <update id="updateLoginTime" parameterType="java.lang.Long">
+    	   UPDATE    user_info
+    	   SET		 last_login_time=sysdate
+    	   WHERE     user_id={#user_id}
+    	   
+    </update>
+    
+    <update id="updateLogoffTime"  parameterType="java.lang.Long">
+           UPDATE    user_info
+           SET		 last_logoff_time=sysdate
+           WHERE     user_id={#user_id}
+    </update>
+    
+    <update id="updateUserInfo"  parameterType="pojo.UserInfoPojo">
+    		UPDATE	user_info
+    		SET     last_modifer=#{user_id},
+    				last_modify_time=sysdate,
+    	    <if test="user_name!=null and user_name!=''">
+    	    		user_name=#{user_name},
+    	    </if>
+    	    <if test="pwd!=null and ''!=pwd" >
+    	    		pwd=#{pwd}
+    	    </if>
+    	    
+    </update>
+    
+    <select id="getRolesByUserId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+    	SELECT    role_id
+    	FROM	  role_user_relationship 
+    	WHERE	  user_id=#{user_id} 
+
+    </select>
+    
+    <insert id="addUser" parameterType="map">
+       <selectKey order="BEFORE" keyProperty="user_id" resultType="java.lang.Long">
+       		SELECT  SEQ_ABOUT_USER.NEXTVAL FROM  dual
+       </selectKey>
+    	INSERT  INTO  user_info 
+    			(user_id,user_name,pwd,is_employee,last_modifier)
+    	VALUES	(#{user_id,jdbcType=DECIMAL},
+    			#{user_name,jdbcType=VARCHAR},
+    			#{pwd,jdbcType=VARCHAR},0,
+    			#{c_user_id})
+    </insert>
+    
+    <insert id="addPermission" parameterType="pojo.BasePermissionPojo">
+    	INSERT  INTO  role_user_relationship t
+    	VALUES(SEQ_PERMISSION.NEXTVAL,
+    			#{user_id,jdbcType=DECIMAL},
+				#{role_id,jdbcType=DECIMAL})
+
+    </insert>
+</mapper>

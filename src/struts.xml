@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!--    指定Web应用的默认编码集，相当于调用 HttpServletRequest的setCharacterEncoding方法。 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" /> 
+
+	<!--  该属性设置Struts 2是否支持动态方法调用，该属性的默认值是true。如果需要关闭动态方法调用，则可设置该属性为false。 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    
+    <!--  开发模式下使用，这样可以打印出更详细的错误信息。 -->
+    <constant name="struts.devMode" value="true" />
+    
+    <!--  该属性设置浏览器是否缓存静态内容。当应用处于开发阶段时，我们希望每次请求都获得服务器的最新响应，则可设置该属性为false。 -->
+    <!-- 设置浏览器是否缓存静态内容，默认值为true（生产环境下使用），开发阶段最好关闭。 -->
+    <constant name="struts.serve.static.browserCache" value="false"/>
+    
+    <!-- 该属性指定需要Struts 2处理的请求后缀，该属性的默认值是action，即所有匹配*.action的请求都由Struts 2处理。
+    	如果用户需要指定多个请求后缀，则多个后缀之间以英文逗号（，）隔开。 -->
+    <constant name="struts.action.extension" value="action" /> 
+    
+    <!--  该属性设置是否每次HTTP请求到达时，系统都重新加载资源文件。该属性默认值是false。
+    	    在开发阶段将该属性设置为true会更有利于开发，但在产品发布阶段应将该属性设置为false。 -->
+    <constant name="struts.i18n.reload" value="true"/>
+     
+   
+    <!-- multipart请求信息的最大尺寸（文件上传用，该属性指定Struts 2文件上传中整个请求内容允许的最大字节数）。 -->
+    <constant name="struts.multipart.maxSize" value="2097152"/>
+    
+    <package name="permission" extends="json-default" abstract="true">
+    		<interceptors>
+    			<interceptor name="permissionInterceptor" class="intercepter.PermissionInterceptor"></interceptor>
+    			<interceptor-stack name="permission-stack">
+    			    <interceptor-ref name="permissionInterceptor"></interceptor-ref>
+    			    <interceptor-ref name="defaultStack"></interceptor-ref>
+    			</interceptor-stack>
+    		</interceptors>
+    		
+    		<default-interceptor-ref name="permissionInterceptor"></default-interceptor-ref>
+    		
+    		<global-results>
+    			<result name="nolog" type="redirect">/login/login.html</result>
+    			<result name="noPermission" type="json">
+    				<param name="root">data</param>
+    			</result>
+    		</global-results>
+    </package>
+    
+    <include file="config/action/login-struts.xml"></include>
+   <include file="config/action/userManager-struts.xml"></include>
+    <!-- <include file="config/struts/permission-struts"></include> -->
+</struts>

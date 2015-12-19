@@ -1,0 +1,9 @@
+/action/
+/config/
+/dao/
+/intercepter/
+/log4j.properties
+/pojo/
+/service/
+/struts.xml
+/vo/
